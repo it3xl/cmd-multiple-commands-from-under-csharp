@@ -44,7 +44,7 @@ namespace PrototypingConsoleApp
                 var waitSeconds = 1;
                 var interrupted = !proc.WaitForExit(waitSeconds * 1000);
 
-                // Remember to use async reads.
+                // Remember to use async reads if you wish.
                 //proc.BeginOutputReadLine
                 //proc.BeginErrorReadLine
 
