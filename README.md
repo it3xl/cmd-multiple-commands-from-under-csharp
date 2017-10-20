@@ -1,4 +1,4 @@
-## CMD-shell from under csharp
+## CMD-shell from under C#
 
 I use this approach to execute a bunch of CMD commands and batch files from under .NET C# in the CMD console.
 
