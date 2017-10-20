@@ -41,8 +41,8 @@ namespace PrototypingConsoleApp
                 proc.StandardInput.WriteLine("EXIT");
                 // No more the used CMD process\ here.
 
-                var waitSeconds = 1;
-                var interrupted = !proc.WaitForExit(waitSeconds * 1000);
+                //var waitSeconds = 1;
+                //var interrupted = !proc.WaitForExit(waitSeconds * 1000);
 
                 // Remember to use async reads if you wish.
                 //proc.BeginOutputReadLine
