@@ -24,9 +24,13 @@ namespace PrototypingConsoleApp
                 proc.StartInfo = info;
                 proc.Start();
 
+                proc.StandardInput.WriteLine("none_existing_command /oops");
+                proc.StandardInput.WriteLine();
                 proc.StandardInput.WriteLine(@"""C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsMSBuildCmd.bat""");
                 proc.StandardInput.WriteLine();
-                proc.StandardInput.WriteLine("not_existing_command /oops");
+                proc.StandardInput.WriteLine(@"ping example.com -n 5");
+                proc.StandardInput.WriteLine();
+                proc.StandardInput.WriteLine("none_existing_command /oops");
                 proc.StandardInput.WriteLine();
                 proc.StandardInput.WriteLine(@"ECHO /?");
                 proc.StandardInput.WriteLine();
@@ -35,7 +39,14 @@ namespace PrototypingConsoleApp
                 // Allow not-blocking use of ReadToEnd().
                 // User the CMD EXIT command vs "proc.StandardInput.Close()" to pass the exit code to .NET proc.ExitCode below;
                 proc.StandardInput.WriteLine("EXIT");
-                // No more the used CMD process here.
+                // No more the used CMD process\ here.
+
+                var waitSeconds = 1;
+                var interrupted = !proc.WaitForExit(waitSeconds * 1000);
+
+                // Remember to use async reads.
+                //proc.BeginOutputReadLine
+                //proc.BeginErrorReadLine
 
                 var output = proc.StandardOutput.ReadToEnd();
                 var errorOutput = proc.StandardError.ReadToEnd();
