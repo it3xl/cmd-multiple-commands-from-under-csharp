@@ -37,7 +37,7 @@ namespace PrototypingConsoleApp
                 proc.StandardInput.WriteLine("ECHO ErrorLever = %ERRORLEVEL%");
 
                 // Allow not-blocking use of ReadToEnd().
-                // User the CMD EXIT command vs "proc.StandardInput.Close()" to pass the exit code to .NET proc.ExitCode below;
+                // Use the CMD EXIT command vs "proc.StandardInput.Close()" to pass the exit code to .NET proc.ExitCode below;
                 proc.StandardInput.WriteLine("EXIT");
                 // No more the used CMD process\ here.
 
