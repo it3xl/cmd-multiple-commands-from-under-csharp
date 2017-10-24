@@ -6,4 +6,32 @@ I use this approach to execute a bunch of multiple CMD commands and batch files 
 
 Implementation [CmdShell.cs](https://github.com/it3xl/cmd-multiple-commands-from-under-csharp/blob/master/CmdShellProj/CmdShell.cs)
 
-Usage [Program.cs](https://github.com/it3xl/cmd-multiple-commands-from-under-csharp/blob/master/ConsoleRunner/Program.cs).
+Sample usage [Program.cs](https://github.com/it3xl/cmd-multiple-commands-from-under-csharp/blob/master/ConsoleRunner/Program.cs).
+
+```csharp
+            var msBuildCommandPrompt = @"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsMSBuildCmd.bat";
+            var somePath = @"C:\temp";
+
+            new CmdShell()
+                .Execute(string.Format(@"
+none_existing_command /oops
+ping example.com -n 5
+none_existing_command /oops
+
+""{0}""
+
+CD ""{1}""
+
+MsBuild SomeProject.csproj^
+ /target:Build^
+ /p:Configuration=Release^
+ /verbosity:normal^
+ /maxCpuCount
+
+ECHO ErrorLever = %ERRORLEVEL%
+
+",
+                msBuildCommandPrompt,
+                somePath
+                ));
+```
