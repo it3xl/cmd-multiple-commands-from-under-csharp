@@ -4,4 +4,6 @@ This emulates work with CMD console. Just like you typing in the console. But no
 
 I use this approach to execute a bunch of multiple CMD commands and batch files from under .NET FrameWork C# in a single CMD console.
 
-See [Program.cs](https://github.com/it3xl/cmd-multiple-commands-from-under-csharp/blob/master/Program.cs) file.
+Implementation [CmdShell.cs](https://github.com/it3xl/cmd-multiple-commands-from-under-csharp/blob/master/CmdShellProj/CmdShell.cs)
+
+Usage [Program.cs](https://github.com/it3xl/cmd-multiple-commands-from-under-csharp/blob/master/ConsoleRunner/Program.cs).
