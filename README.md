@@ -22,7 +22,7 @@ CALL ""{0}""
 
 CD ""{1}""
 
-@RAM Output to the nul is used here to prevent a nung up.
+@RAM Output to the nul is used here to prevent a hang up.
 @RAM You can do the output to a file if you need.
 CALL MsBuild SomeProject.csproj^
  /target:Build^
