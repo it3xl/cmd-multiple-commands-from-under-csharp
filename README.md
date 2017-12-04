@@ -22,11 +22,13 @@ CALL ""{0}""
 
 CD ""{1}""
 
+@RAM Output to the nul is used here to prevent a hang up.
+@RAM You can do the output to a file if you need.
 CALL MsBuild SomeProject.csproj^
  /target:Build^
  /p:Configuration=Release^
  /verbosity:normal^
- /maxCpuCount
+ /maxCpuCount > nul
 
 ECHO ErrorLever = %ERRORLEVEL%
 
@@ -38,4 +40,5 @@ ECHO ErrorLever = %ERRORLEVEL%
 
 ## Known issues
 
+* If you have a huge console output (stdout) you can get a hang up. Redirect it to a file or use a redirection to the [> null](https://ss64.com/nt/syntax-redirection.html).
 * Always use the CALL CMD-command to invoke batch files. Otherwise, you can hang up your CMD execution.
