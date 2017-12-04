@@ -38,4 +38,5 @@ ECHO ErrorLever = %ERRORLEVEL%
 
 ## Known issues
 
+* If you have a huge console output (stdout) you can get a hang up. Redirect it to a file or use a redirection to [> null](https://ss64.com/nt/syntax-redirection.html).
 * Always use the CALL CMD-command to invoke batch files. Otherwise, you can hang up your CMD execution.
