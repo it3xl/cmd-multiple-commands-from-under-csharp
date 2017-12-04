@@ -26,7 +26,7 @@ CALL MsBuild SomeProject.csproj^
  /target:Build^
  /p:Configuration=Release^
  /verbosity:normal^
- /maxCpuCount
+ /maxCpuCount > nul
 
 ECHO ErrorLever = %ERRORLEVEL%
 
