@@ -18,11 +18,11 @@ none_existing_command /oops
 ping example.com -n 5
 none_existing_command /oops
 
-""{0}""
+CALL ""{0}""
 
 CD ""{1}""
 
-MsBuild SomeProject.csproj^
+CALL MsBuild SomeProject.csproj^
  /target:Build^
  /p:Configuration=Release^
  /verbosity:normal^
@@ -35,3 +35,7 @@ ECHO ErrorLever = %ERRORLEVEL%
                 somePath
                 ));
 ```
+
+## Known issues
+
+* Always use the CALL CMD-command to invoke batch files. Otherwise, you can hang up your CMD execution.
