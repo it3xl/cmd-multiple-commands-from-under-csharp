@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 
 namespace CmdShellProj
 {
@@ -10,6 +11,8 @@ namespace CmdShellProj
     /// </summary>
     public class CmdShell
     {
+        private readonly StringBuilder _outputCombined = new StringBuilder();
+
         public void Execute(string cmdCommands)
         {
             var commandsList = cmdCommands.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
@@ -30,7 +33,11 @@ namespace CmdShellProj
             using (proc)
             {
                 proc.StartInfo = info;
+                proc.OutputDataReceived += DataReceived;
+                proc.ErrorDataReceived += DataReceived;
                 proc.Start();
+                proc.BeginOutputReadLine();
+                proc.BeginErrorReadLine();
 
                 // This could be useful for somebody to use async reads if you wish.
                 //proc.BeginOutputReadLine
@@ -45,16 +52,36 @@ namespace CmdShellProj
                 proc.StandardInput.WriteLine("EXIT");
                 // At this point, the used CMD process does not exist anymore.
 
-                var waitSeconds = 600;
-                var interrupted = !proc.WaitForExit(waitSeconds * 1000);
+                var waitMinutes = 15;
+                bool interrupted;
+                while (true)
+                {
+                    interrupted = !proc.WaitForExit(waitMinutes * 1000 * 60);
+
+                    if (interrupted || proc.HasExited)
+                    {
+                        break;
+                    }
+                }
+
+                string catchedOutputAll;
+                lock (_outputCombined)
+                {
+                    catchedOutputAll = _outputCombined.ToString();
+                }
 
                 if (interrupted)
                 {
                     //throw new Exception(string.Format("Was interrupted after waiting for {0} seconds.", waitSeconds));
                 }
 
-                var output = proc.StandardOutput.ReadToEnd();
-                var errorOutput = proc.StandardError.ReadToEnd();
+                
+
+                if (!proc.HasExited)
+                {
+                    
+                }
+
 
                 var exitCode = proc.ExitCode;
                 if (exitCode != 0)
@@ -63,19 +90,24 @@ namespace CmdShellProj
                     return;
 
                     throw new Exception(string.Format(@"Error exit code {0} received.
-Error Output:
-{1}
 
 Output:
-{2}
+{1}
 ",
                         exitCode,
-                        errorOutput,
-                        output
+                        catchedOutputAll
                         ));
                 }
             }
 
+        }
+
+        private void DataReceived(object sender, DataReceivedEventArgs e)
+        {
+            lock (_outputCombined)
+            {
+                _outputCombined.AppendLine(e.Data);
+            }
         }
     }
 }

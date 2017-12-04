@@ -19,8 +19,8 @@ CALL ""{0}""
 
 CD ""{1}""
 
-@RAM Output to the nul is used here to prevent a hang up.
-@RAM You can do the output to a file if you need.
+@REM Output to the nul is used here to prevent a hang up.
+@REM You can do the output to a file if you need.
 CALL MsBuild SomeProject.csproj^
  /target:Build^
  /p:Configuration=Release^
