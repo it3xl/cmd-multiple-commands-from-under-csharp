@@ -10,29 +10,26 @@ namespace ConsoleRunner
             var somePath = @"C:\temp";
 
             new CmdShell()
-                .Execute(string.Format(@"
+                .Execute($@"
+CD /
+
 none_existing_command /oops
 ping example.com -n 5
 none_existing_command /oops
 
-CALL ""{0}""
+CALL ""{msBuildCommandPrompt}""
 
-CD ""{1}""
+CD ""{somePath}""
 
-@REM Output to the nul is used here to prevent a hang up.
-@REM You can do the output to a file if you need.
 CALL MsBuild SomeProject.csproj^
  /target:Build^
  /p:Configuration=Release^
  /verbosity:normal^
- /maxCpuCount > nul
+ /maxCpuCount
 
 ECHO ErrorLever = %ERRORLEVEL%
 
-",
-                msBuildCommandPrompt,
-                somePath
-                ));
+");
         }
     }
 }

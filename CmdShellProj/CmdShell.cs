@@ -20,12 +20,46 @@ namespace CmdShellProj
             var info = new ProcessStartInfo
             {
                 FileName = "cmd.exe",
+                // The false allows access IO streams.
+                UseShellExecute = false,
+                // Allows write commands directly to CMD.
+                RedirectStandardInput = true,
+            };
+            var proc = new Process { StartInfo = info };
+            // The "using" is more safe alternative for "proc.Close()" to release resources.
+            using (proc)
+            {
+                proc.Start();
+
+                commandsList.ToList()
+                    .ForEach(command => proc
+                        .StandardInput.WriteLine(command));
+
+
+                proc.StandardInput.WriteLine("@REM Exiting by CmdShell App. The last command sent.");
+                // Allows exiting from CMD side.
+                proc.StandardInput.WriteLine("EXIT");
+
+                var waitMinutes = 15;
+                var interrupted = !proc.WaitForExit(waitMinutes * 1000 * 60);
+
+                ProcessCompletetion(interrupted, proc);
+            }
+        }
+
+        public void ExecuteCatchOutputs(string cmdCommands)
+        {
+            var commandsList = cmdCommands.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+
+            var info = new ProcessStartInfo
+            {
+                FileName = "cmd.exe",
 
                 // The Process object must have the UseShellExecute property set to false in order to redirect IO streams.
                 UseShellExecute = false,
                 RedirectStandardInput = true,
-                RedirectStandardError = true,
-                RedirectStandardOutput = true
+                //RedirectStandardError = true,
+                //RedirectStandardOutput = true
             };
 
             var proc = new Process();
@@ -36,8 +70,8 @@ namespace CmdShellProj
                 proc.OutputDataReceived += DataReceived;
                 proc.ErrorDataReceived += DataReceived;
                 proc.Start();
-                proc.BeginOutputReadLine();
-                proc.BeginErrorReadLine();
+                //proc.BeginOutputReadLine();
+                //proc.BeginErrorReadLine();
 
                 // This could be useful for somebody to use async reads if you wish.
                 //proc.BeginOutputReadLine
@@ -53,53 +87,51 @@ namespace CmdShellProj
                 // At this point, the used CMD process does not exist anymore.
 
                 var waitMinutes = 15;
-                bool interrupted;
-                while (true)
+                var interrupted = false;
+                while (!interrupted && !proc.HasExited)
                 {
                     interrupted = !proc.WaitForExit(waitMinutes * 1000 * 60);
-
-                    if (interrupted || proc.HasExited)
-                    {
-                        break;
-                    }
                 }
 
-                string catchedOutputAll;
-                lock (_outputCombined)
-                {
-                    catchedOutputAll = _outputCombined.ToString();
-                }
+                ProcessCompletetion(interrupted, proc);
+            }
 
-                if (interrupted)
-                {
-                    //throw new Exception(string.Format("Was interrupted after waiting for {0} seconds.", waitSeconds));
-                }
+        }
 
-                
+        private void ProcessCompletetion(bool interrupted, Process proc)
+        {
+            string catchedOutputAll;
+            lock (_outputCombined)
+            {
+                catchedOutputAll = _outputCombined.ToString();
+            }
 
-                if (!proc.HasExited)
-                {
-                    
-                }
+            if (interrupted)
+            {
+                //throw new Exception(string.Format("Was interrupted after waiting for {0} seconds.", waitSeconds));
+            }
 
 
-                var exitCode = proc.ExitCode;
-                if (exitCode != 0)
-                {
-                    // STUB: Remove the return.
-                    return;
+            if (!proc.HasExited)
+            {
+            }
 
-                    throw new Exception(string.Format(@"Error exit code {0} received.
+
+            var exitCode = proc.ExitCode;
+            if (exitCode != 0)
+            {
+                // STUB: Remove the return.
+                return;
+
+                throw new Exception(string.Format(@"Error exit code {0} received.
 
 Output:
 {1}
 ",
-                        exitCode,
-                        catchedOutputAll
-                        ));
-                }
+                    exitCode,
+                    catchedOutputAll
+                    ));
             }
-
         }
 
         private void DataReceived(object sender, DataReceivedEventArgs e)
