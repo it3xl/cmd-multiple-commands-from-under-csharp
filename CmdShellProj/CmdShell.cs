@@ -21,7 +21,7 @@ namespace CmdShellProj
         /// <param name="cmdCommands">CMD commands to be executed separated. Multi or a single line.</param>
         /// <param name="executionLimit">The maximum duration limit for the entire execution. Default is 15 minutes.</param>
         /// <param name="throwExceptions">Throw an exceptions in case of a non-zero exit code or exceeding the duration limit.</param>
-        public void ExecExample(string cmdCommands, bool throwExceptions = false, TimeSpan? executionLimit = null)
+        public void ExecExample(string cmdCommands, TimeSpan? executionLimit = null, bool throwExceptions = false)
         {
             var commandsList = cmdCommands
                     .Replace("\r", string.Empty)
@@ -45,7 +45,7 @@ namespace CmdShellProj
                         .StandardInput.WriteLine(command));
 
                 proc.StandardInput.WriteLine("@REM Exiting by CmdShell App. The last command sent.");
-                // Allows exiting from CMD side.
+                // Allows exiting from a CMD side.
                 proc.StandardInput.WriteLine("EXIT");
 
                 var span = executionLimit ?? TimeSpan.FromMinutes(15);
@@ -174,6 +174,7 @@ namespace CmdShellProj
                     return;
 
                 // Passes CMD's outputes to your process' console.
+                // It must be here, otherwise we'll get a mess from stdout & stderr in _outputCombined at the beginning.
                 Console.WriteLine(e.Data);
 
                 if (!_combineOutputs)
