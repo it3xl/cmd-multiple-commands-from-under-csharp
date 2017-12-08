@@ -14,12 +14,14 @@ namespace CmdShellProj
     public class CmdShell
     {
         /// <summary>
-        /// Executes CMD commands and shows outputs (stdout, stderr) on a console window. A combined version to show an idea.
+        /// This method is for evolving by you and combines main techniques at once.
+        /// It is an exact anamog of <see cref="ExecAndShow(string, bool, TimeSpan?)".
+        /// Also consider to look at <see cref="ExecAndLog(string, bool, TimeSpan?)"/>.
         /// </summary>
         /// <param name="cmdCommands">CMD commands to be executed separated. Multi or a single line.</param>
         /// <param name="throwExceptions">Throw an exceptions in case of a non-zero exit code or exceeding the duration limit.</param>
-        /// <param name="executionLimit">The maximum duration limit for the entire execution.</param>
-        public void Execute(string cmdCommands, bool throwExceptions = false, TimeSpan? executionLimit = null)
+        /// <param name="executionLimit">The maximum duration limit for the entire execution. Default is 15 minutes.</param>
+        public void Exec(string cmdCommands, bool throwExceptions = false, TimeSpan? executionLimit = null)
         {
             var commandsList = cmdCommands
                     .Replace("\r", string.Empty)
@@ -70,7 +72,7 @@ namespace CmdShellProj
         /// </summary>
         /// <param name="cmdCommands">CMD commands to be executed separated. Multi or a single line.</param>
         /// <param name="throwExceptions">Throw an exceptions in case of a non-zero exit code or exceeding the duration limit.</param>
-        /// <param name="executionLimit">The maximum duration limit for the entire execution.</param>
+        /// <param name="executionLimit">The maximum duration limit for the entire execution. Default is 15 minutes.</param>
         public void ExecAndShow(string cmdCommands, bool throwExceptions = false, TimeSpan? executionLimit = null)
         {
             new Demonstrating(cmdCommands, throwExceptions, executionLimit)
@@ -109,7 +111,7 @@ namespace CmdShellProj
         /// </summary>
         /// <param name="cmdCommands">CMD commands to be executed separated. Multi or a single line.</param>
         /// <param name="throwExceptions">Throw an exceptions in case of a non-zero exit code or exceeding the duration limit.</param>
-        /// <param name="outputWaitingLimit">The maximum duration limit for any output from a CMD-shell.</param>
+        /// <param name="outputWaitingLimit">The maximum duration limit for any output waiting from a CMD-shell. Default is 15 minutes.</param>
         public void ExecAndLog(string cmdCommands, bool throwExceptions = false, TimeSpan? outputWaitingLimit = null)
         {
             new OutputCatcher(cmdCommands, throwExceptions, outputWaitingLimit)
