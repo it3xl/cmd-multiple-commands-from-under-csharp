@@ -1,144 +1,276 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 
 namespace CmdShellProj
 {
     /// <summary>
-    /// it3xl/CMD-shell_from_under_csharp
-    /// https://github.com/it3xl/CMD-shell_from_under_csharp/blob/master/Program.cs
+    /// it3xl/cmd-multiple-commands-from-under-csharp
+    /// https://github.com/it3xl/cmd-multiple-commands-from-under-csharp
     /// </summary>
     public class CmdShell
     {
-        private readonly StringBuilder _outputCombined = new StringBuilder();
-
-        public void Execute(string cmdCommands)
+        /// <summary>
+        /// Executes CMD commands and shows outputs (stdout, stderr) on a console window. A combined version to show an idea.
+        /// </summary>
+        /// <param name="cmdCommands">CMD commands to be executed separated. Multi or a single line.</param>
+        /// <param name="throwExceptions">Throw an exceptions in case of a non-zero exit code or exceeding the duration limit.</param>
+        /// <param name="executionLimit">The maximum duration limit for the entire execution.</param>
+        public void Execute(string cmdCommands, bool throwExceptions = false, TimeSpan? executionLimit = null)
         {
-            var commandsList = cmdCommands.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+            var commandsList = cmdCommands
+                    .Replace("\r", string.Empty)
+                    .Split('\n')
+                    .ToList();
 
             var info = new ProcessStartInfo
             {
                 FileName = "cmd.exe",
-                // The false allows access IO streams.
+                // The false allows to access IO streams.
                 UseShellExecute = false,
-                // Allows write commands directly to CMD.
+                // Allows write commands directly to a CMD-shell.
                 RedirectStandardInput = true,
             };
             var proc = new Process { StartInfo = info };
-            // The "using" is more safe alternative for "proc.Close()" to release resources.
             using (proc)
             {
                 proc.Start();
 
-                commandsList.ToList()
-                    .ForEach(command => proc
+                commandsList.ForEach(command => proc
                         .StandardInput.WriteLine(command));
-
 
                 proc.StandardInput.WriteLine("@REM Exiting by CmdShell App. The last command sent.");
                 // Allows exiting from CMD side.
                 proc.StandardInput.WriteLine("EXIT");
 
-                var waitMinutes = 15;
-                var interrupted = !proc.WaitForExit(waitMinutes * 1000 * 60);
+                var span = executionLimit ?? TimeSpan.FromMinutes(15);
+                var milliseconds = span.TotalMilliseconds;
+                var duration = milliseconds < int.MaxValue
+                    ? (int)milliseconds
+                    : int.MaxValue;
 
-                ProcessCompletetion(interrupted, proc);
+                var interrupted = !proc.WaitForExit(duration);
+
+                if (!throwExceptions)
+                    return;
+
+                if (interrupted)
+                    throw new Exception("Duration limit is exceeded");
+
+                if (proc.ExitCode != 0)
+                    throw new Exception($@"Error exit code {proc.ExitCode} received.");
             }
         }
 
-        public void ExecuteCatchOutputs(string cmdCommands)
+        /// <summary>
+        /// Executes CMD commands and shows outputs (stdout, stderr) on a console window.
+        /// </summary>
+        /// <param name="cmdCommands">CMD commands to be executed separated. Multi or a single line.</param>
+        /// <param name="throwExceptions">Throw an exceptions in case of a non-zero exit code or exceeding the duration limit.</param>
+        /// <param name="executionLimit">The maximum duration limit for the entire execution.</param>
+        public void ExecAndShow(string cmdCommands, bool throwExceptions = false, TimeSpan? executionLimit = null)
         {
-            var commandsList = cmdCommands.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+            new Demonstrating(cmdCommands, throwExceptions, executionLimit)
+                .Exec();
+        }
 
-            var info = new ProcessStartInfo
+        /// <summary>
+        /// Executes CMD commands and shows outputs (stdout, stderr) on a console window.
+        /// </summary>
+        private sealed class Demonstrating : CmdShellBase
+        {
+            private readonly int _executionLimitMillisec;
+
+            public Demonstrating(string cmdCommands, bool throwExceptions, TimeSpan? executionLimit)
+                : base(cmdCommands, throwExceptions)
             {
-                FileName = "cmd.exe",
+                _executionLimitMillisec = GetMilliseconds(executionLimit);
+            }
 
-                // The Process object must have the UseShellExecute property set to false in order to redirect IO streams.
-                UseShellExecute = false,
-                RedirectStandardInput = true,
-                //RedirectStandardError = true,
-                //RedirectStandardOutput = true
-            };
-
-            var proc = new Process();
-            // The "using" is more safe alternative for "proc.Close()" to release resources.
-            using (proc)
+            public override void Exec()
             {
-                proc.StartInfo = info;
-                proc.OutputDataReceived += DataReceived;
-                proc.ErrorDataReceived += DataReceived;
-                proc.Start();
-                //proc.BeginOutputReadLine();
-                //proc.BeginErrorReadLine();
-
-                // This could be useful for somebody to use async reads if you wish.
-                //proc.BeginOutputReadLine
-                //proc.BeginErrorReadLine
-
-                commandsList.ToList()
-                    .ForEach(command => proc
-                        .StandardInput.WriteLine(command));
-
-                // Allow not-blocking use of ReadToEnd().
-                // Use the CMD EXIT command vs "proc.StandardInput.Close()" to pass the exit code to .NET proc.ExitCode below;
-                proc.StandardInput.WriteLine("EXIT");
-                // At this point, the used CMD process does not exist anymore.
-
-                var waitMinutes = 15;
-                var interrupted = false;
-                while (!interrupted && !proc.HasExited)
+                InitProcess();
+                using (Proc)
                 {
-                    interrupted = !proc.WaitForExit(waitMinutes * 1000 * 60);
+                    RunCommands();
+
+                    var interrupted = !Proc.WaitForExit(_executionLimitMillisec);
+
+                    Throw(interrupted, Proc.ExitCode);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Executes CMD commands and catches all outputs (stdout, stderr).
+        /// </summary>
+        /// <param name="cmdCommands">CMD commands to be executed separated. Multi or a single line.</param>
+        /// <param name="throwExceptions">Throw an exceptions in case of a non-zero exit code or exceeding the duration limit.</param>
+        /// <param name="outputWaitingLimit">The maximum duration limit for any output from a CMD-shell.</param>
+        public void ExecAndLog(string cmdCommands, bool throwExceptions = false, TimeSpan? outputWaitingLimit = null)
+        {
+            new OutputCatcher(cmdCommands, throwExceptions, outputWaitingLimit)
+                .Exec();
+        }
+
+        /// <summary>
+        /// Executes CMD commands and catches outputs (stdout, stderr) from the CMD-console.
+        /// It is mostly for debug purposes, so you prefer to use the CMD Redirection to a log-file.
+        /// </summary>
+        private sealed class OutputCatcher : CmdShellBase
+        {
+            private readonly int _outputWaitingLimit;
+
+            private readonly StringBuilder _outputCombined = new StringBuilder();
+
+            public OutputCatcher(string cmdCommands, bool throwExceptions = false, TimeSpan? outputWaitingLimit = null) : base(cmdCommands, throwExceptions)
+            {
+                _outputWaitingLimit = GetMilliseconds(outputWaitingLimit);
+            }
+
+            public override void Exec()
+            {
+                ProcStartInfo.RedirectStandardOutput = true;
+                ProcStartInfo.RedirectStandardError = true;
+
+                InitProcess();
+                using (Proc)
+                {
+                    Proc.OutputDataReceived += DataReceived;
+                    Proc.BeginOutputReadLine();
+                    Proc.ErrorDataReceived += DataReceived;
+                    Proc.BeginErrorReadLine();
+
+                    RunCommands();
+
+                    var interrupted = false;
+                    while (!interrupted && !Proc.HasExited)
+                    {
+                        interrupted = !Proc.WaitForExit(_outputWaitingLimit);
+                    }
+
+                    Throw(interrupted, Proc.ExitCode);
+                }
+            }
+
+            private void DataReceived(object sender, DataReceivedEventArgs e)
+            {
+                lock (_outputCombined)
+                {
+                    _outputCombined.AppendLine(e.Data);
+                }
+            }
+
+            protected override void Throw(bool interrupted, int exitCode)
+            {
+                if (!ThrowExceptions)
+                    return;
+
+                string catchedOutput;
+                lock (_outputCombined)
+                {
+                    catchedOutput = _outputCombined.ToString();
                 }
 
-                ProcessCompletetion(interrupted, proc);
-            }
+                if (interrupted)
+                {
+                    throw new Exception($"Duration limit is exceeded.\nOutput:\n{catchedOutput}");
+                }
 
-        }
-
-        private void ProcessCompletetion(bool interrupted, Process proc)
-        {
-            string catchedOutputAll;
-            lock (_outputCombined)
-            {
-                catchedOutputAll = _outputCombined.ToString();
-            }
-
-            if (interrupted)
-            {
-                //throw new Exception(string.Format("Was interrupted after waiting for {0} seconds.", waitSeconds));
-            }
-
-
-            if (!proc.HasExited)
-            {
-            }
-
-
-            var exitCode = proc.ExitCode;
-            if (exitCode != 0)
-            {
-                // STUB: Remove the return.
-                return;
-
-                throw new Exception(string.Format(@"Error exit code {0} received.
-
-Output:
-{1}
-",
-                    exitCode,
-                    catchedOutputAll
-                    ));
+                if (exitCode != 0)
+                {
+                    throw new Exception($"Error exit code {exitCode} received.\nOutput:\n{catchedOutput}");
+                }
             }
         }
 
-        private void DataReceived(object sender, DataReceivedEventArgs e)
+        private abstract class CmdShellBase
         {
-            lock (_outputCombined)
+            private List<string> CommandsList { get; }
+            protected bool ThrowExceptions { get; }
+            protected ProcessStartInfo ProcStartInfo { get; }
+            protected Process Proc { get; private set; }
+
+            protected CmdShellBase(string cmdCommands, bool throwExceptions)
             {
-                _outputCombined.AppendLine(e.Data);
+                CommandsList = cmdCommands
+                    .Replace("\r", string.Empty)
+                    .Split('\n')
+                    .ToList();
+
+                ThrowExceptions = throwExceptions;
+
+                ProcStartInfo = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    // The false allows to access IO streams.
+                    UseShellExecute = false,
+                    // Allows write commands directly to a CMD-shell.
+                    RedirectStandardInput = true,
+                };
+            }
+
+            public abstract void Exec();
+
+            protected virtual void Throw(bool interrupted, int exitCode)
+            {
+                if (!ThrowExceptions)
+                    return;
+
+                if (interrupted)
+                    throw new Exception("Duration limit is exceeded");
+
+                if (exitCode != 0)
+                    throw new Exception($@"Error exit code {exitCode} received.");
+            }
+
+            protected void InitProcess()
+            {
+                Proc = new Process
+                    {
+                        StartInfo = ProcStartInfo
+                    };
+                try
+                {
+                    Proc.Start();
+                }
+                catch (Exception)
+                {
+                    Proc.Dispose();
+
+                    throw;
+                }
+            }
+
+            protected void RunCommands()
+            {
+                CommandsList.ForEach(command => Proc.StandardInput.WriteLine(command));
+                FinishCmd(Proc.StandardInput);
+            }
+
+            protected int GetMilliseconds(TimeSpan? timeSpan)
+            {
+                var span = timeSpan ?? TimeSpan.FromMinutes(15);
+                var milliseconds = span.TotalMilliseconds;
+                var duration = milliseconds < int.MaxValue
+                    ? (int)milliseconds
+                    : int.MaxValue;
+
+                return duration;
+            }
+
+            /// <summary>
+            /// Allows exiting from a CMD side. Required.
+            /// </summary>
+            /// <param name="cmdInput"></param>
+            private void FinishCmd(StreamWriter cmdInput)
+            {
+                cmdInput.WriteLine("@REM Exiting by CmdShell App. The last command sent.");
+                // Allows exiting from CMD side.
+                cmdInput.WriteLine("EXIT");
             }
         }
     }

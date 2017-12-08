@@ -9,8 +9,7 @@ namespace ConsoleRunner
             var msBuildCommandPrompt = @"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsMSBuildCmd.bat";
             var somePath = @"C:\temp";
 
-            new CmdShell()
-                .Execute($@"
+            var commands = $@"
 CD /
 
 none_existing_command /oops
@@ -27,9 +26,15 @@ CALL MsBuild SomeProject.csproj^
  /verbosity:normal^
  /maxCpuCount
 
-ECHO ErrorLever = %ERRORLEVEL%
+ECHO ErrorLever = %ERRORLEVEL%";
 
-");
+            new CmdShell()
+                .Execute(commands);
+            new CmdShell()
+                .ExecAndShow(commands);
+            new CmdShell()
+                .ExecAndLog(commands);
+
         }
     }
 }
