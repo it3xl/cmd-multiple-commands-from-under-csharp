@@ -117,7 +117,7 @@ namespace CmdShellProj
         /// <param name="combineOutputs">Instructs to combine all console outputs to a StringBuilder.</param>
         public void ExecAndShowCatched(string cmdCommands, TimeSpan? outputWaitingLimit = null, bool throwExceptions = false, bool combineOutputs = false)
         {
-            new OutputCatcher(cmdCommands, outputWaitingLimit, throwExceptions)
+            new OutputCatcher(cmdCommands, outputWaitingLimit, throwExceptions, combineOutputs)
                 .Exec();
         }
 
