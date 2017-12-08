@@ -1,4 +1,5 @@
 ﻿using CmdShellProj;
+using System;
 
 namespace ConsoleRunner
 {
@@ -9,7 +10,7 @@ namespace ConsoleRunner
             var msBuildCommandPrompt = @"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsMSBuildCmd.bat";
             var somePath = @"C:\temp";
 
-            var commands = $@"
+            var cmdCommands = $@"
 CD /
 
 none_existing_command /oops
@@ -29,11 +30,13 @@ CALL MsBuild SomeProject.csproj^
 ECHO ErrorLever = %ERRORLEVEL%";
 
             new CmdShell()
-                .Exec(commands);
+                .ExecAndShowCatched(cmdCommands);
+
             new CmdShell()
-                .ExecAndShow(commands);
+                .ExecAndShow(cmdCommands);
+
             new CmdShell()
-                .ExecAndLog(commands);
+                .ExecAsTemplate(cmdCommands);
 
         }
     }
