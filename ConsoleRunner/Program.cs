@@ -36,7 +36,7 @@ ECHO ErrorLever = %ERRORLEVEL%";
                 .ExecAndShow(cmdCommands);
 
             new CmdShell()
-                .ExecAsTemplate(cmdCommands);
+                .ExecExample(cmdCommands);
 
         }
     }

@@ -21,7 +21,7 @@ namespace CmdShellProj
         /// <param name="cmdCommands">CMD commands to be executed separated. Multi or a single line.</param>
         /// <param name="executionLimit">The maximum duration limit for the entire execution. Default is 15 minutes.</param>
         /// <param name="throwExceptions">Throw an exceptions in case of a non-zero exit code or exceeding the duration limit.</param>
-        public void ExecAsTemplate(string cmdCommands, bool throwExceptions = false, TimeSpan? executionLimit = null)
+        public void ExecExample(string cmdCommands, bool throwExceptions = false, TimeSpan? executionLimit = null)
         {
             var commandsList = cmdCommands
                     .Replace("\r", string.Empty)
@@ -161,7 +161,7 @@ namespace CmdShellProj
 
                     if (Debugger.IsAttached)
                     {
-                        System.Threading.Thread.Sleep(TimeSpan.FromSeconds(60));
+                        System.Threading.Thread.Sleep(TimeSpan.FromSeconds(1));
                     }
 
                     Throw(interrupted, Proc.ExitCode);
