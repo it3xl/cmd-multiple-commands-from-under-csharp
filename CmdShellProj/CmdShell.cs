@@ -15,8 +15,8 @@ namespace CmdShellProj
     {
         /// <summary>
         /// This method is for evolving by you and combines main techniques at once.
-        /// It is an exact anamog of <see cref="ExecAndShow(string, bool, TimeSpan?)".
-        /// Also consider to look at <see cref="ExecAndShowCatched(string, bool, TimeSpan?)"/>.
+        /// It is an exact anamog of <see cref="ExecAndShow"/>.
+        /// Also consider to look at <see cref="ExecAndShowCatched"/>.
         /// </summary>
         /// <param name="cmdCommands">CMD commands to be executed separated. Multi or a single line.</param>
         /// <param name="executionLimit">The maximum duration limit for the entire execution. Default is 15 minutes.</param>
@@ -107,8 +107,8 @@ namespace CmdShellProj
         }
 
         /// <summary>
-        /// In some cases you must catch all outputes, otherwise you shell will fail (in SSIS' Script Task as an example).
-        /// This executes CMD commands, captures all outputs (stdout and stderr, not only stdin)
+        /// In some cases you must catch huge outputs, otherwise you shell will fail.
+        /// This method executes CMD commands, captures all outputs (stdout and stderr, not only stdin)
         ///  and passes them to your shell.
         /// </summary>
         /// <param name="cmdCommands">CMD commands to be executed separated. Multi or a single line.</param>
@@ -173,7 +173,7 @@ namespace CmdShellProj
                 if (e.Data == null)
                     return;
 
-                // Passes CMD's outputes to your process' console.
+                // Passes CMD's outputs to your process' console.
                 // It must be here, otherwise we'll get a mess from stdout & stderr in _outputCombined at the beginning.
                 Console.WriteLine(e.Data);
 
@@ -256,6 +256,7 @@ namespace CmdShellProj
                     throw new Exception("Duration limit is exceeded");
 
                 if (exitCode != 0)
+                    // ReSharper disable once UseStringInterpolation
                     throw new Exception(string.Format("Error exit code {0} received.", exitCode));
             }
 
