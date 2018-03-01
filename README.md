@@ -1,7 +1,7 @@
 ## CMD multiple commands from under C#
  
 The solutions emulates the work with CMD console.<br/>
-ust like you typing in the console. But now you invoke your CMD-commands from you C#.
+Just like you typing on the console. But now you invoke your CMD-commands from you C#.
 
 I use this approach to execute a bunch of multiple CMD commands and batch files.
 
