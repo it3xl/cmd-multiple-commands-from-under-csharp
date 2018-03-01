@@ -33,6 +33,7 @@ ECHO ErrorLever = %ERRORLEVEL%";
 ```
 ## Useful to know
 
-* Use ExecAndShowCatched method if you need to intercept CMD outputs in your C#. You can store or analyze it.
+* Use **ExecAndShowCatched** method if you need to intercept CMD outputs in your C#. You can store or analyze it.
+* **ExecAndShow** allows to debug in an interactive session, i.e. where you can see the console window.
 
 
