@@ -10,7 +10,7 @@ Implementation [CmdShell.cs](https://github.com/it3xl/cmd-multiple-commands-from
 ### Warning
 
 For any invocations without an iteractive session!<br/>
-Use **ExecAndShowCatched** instead of **ExecAndShow**. ExecAndShow doesn't work in this case.
+Use the **ExecAndShowCatched** method instead of **ExecAndShow**. ExecAndShow doesn't work in this case.
 
 ```csharp
     var cmdCommands = $@"
