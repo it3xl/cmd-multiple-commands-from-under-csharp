@@ -28,8 +28,8 @@ CALL MsBuild SomeProject.csproj^
 
 ECHO ErrorLever = %ERRORLEVEL%";
 
-    new CmdShell()
-        .ExecAndShow(cmdCommands);
+    //new CmdShell().ExecAndShowCatched(cmdCommands);
+    new CmdShell().ExecAndShow(cmdCommands);
 ```
 ## Useful to know
 
