@@ -26,7 +26,8 @@ CALL MsBuild SomeProject.csproj^
  /verbosity:normal^
  /maxCpuCount
 
-ECHO ErrorLever = %ERRORLEVEL%";
+ECHO ErrorLever = %ERRORLEVEL%
+";
 
     //new CmdShell().ExecAndShowCatched(cmdCommands);
     new CmdShell().ExecAndShow(cmdCommands);
