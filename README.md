@@ -27,8 +27,9 @@ ECHO ErrorLever = %ERRORLEVEL%";
 ```
 ## Useful to know
 
-* With a small change the solution is ready to intercept CMD outputs in C#.
+* Use ExecAndShowCatched method if you need to intercept CMD outputs in your C#. You can store or analyze it.
 
 ## Known issues
 
-* Prefer to use the CALL CMD-command to invoke batch files. Otherwise, you can hang up your CMD execution in some rare cases.
+* ! Warning. For any invocations without an iteractive session!<br/>
+Use **ExecAndShowCatched** instead of **ExecAndShow**. ExecAndShow doesn't work in this case.
