@@ -1,7 +1,7 @@
 ## CMD multiple commands from under C#
  
-The solutions emulates the work with the CMD console.<br/>
-Just like you are typing on the console. But now you'll invoke your CMD-commands from you C#.
+The solution emulates working with the CMD console.<br/>
+Gather all your CMD-commands you want to type on the console and invoke them from you C# code.
 
 I use this approach to execute a bunch of multiple CMD commands and batch files.
 
@@ -9,7 +9,7 @@ Implementation [CmdShell.cs](https://github.com/it3xl/cmd-multiple-commands-from
 
 ### Warning
 
-For any invocations without an iteractive session!<br/>
+For any invocations without an iteractive session (build machines, windows services)!<br/>
 Use the **ExecAndShowCatched** method instead of **ExecAndShow**. ExecAndShow doesn't work in this case.
 
 ```csharp
@@ -36,5 +36,6 @@ ECHO ErrorLever = %ERRORLEVEL%
 
 * Use **ExecAndShowCatched** method if you need to intercept CMD outputs in your C#. You can store or analyze it.
 * **ExecAndShow** allows to debug in an interactive session, i.e. where you can see the console window.
+* I put all logic and methods in a single file for an usefulness of automation professionals. Feel free to decompose it.
 
 
