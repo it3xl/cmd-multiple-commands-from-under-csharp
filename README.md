@@ -12,7 +12,7 @@ Implementation [CmdShell.cs](https://github.com/it3xl/cmd-multiple-commands-from
 For any invocations without an iteractive session (build machines, windows services)!<br/>
 Use the **ExecAndShowCatched** method instead of **ExecAndShow**. ExecAndShow doesn't work in this case.
 
-### Example
+### C# Example
 
 ```csharp
     var cmdCommands = $@"
