@@ -119,10 +119,11 @@ namespace CmdShellProj
         /// </summary>
         /// <param name="cmdCommands">CMD commands to be executed separated. Multi or a single line.</param>
         /// <param name="throwExceptions">Throw an exceptions in case of a non-zero exit code or exceeding the duration limit.</param>
+        /// <param name="collectOutputs">Instructs to collect all console outputs.</param>
         /// <param name="outputWaitLimit">The maximum duration limit for any output waiting from a CMD-shell. Default is 15 minutes.</param>
-        public int ExecAndShowCatched(string cmdCommands, TimeSpan? outputWaitLimit = null, bool throwExceptions = false)
+        public int ExecAndShowCatched(string cmdCommands, bool throwExceptions = false, bool collectOutputs = false, TimeSpan? outputWaitLimit = null)
         {
-            var exitCode = new OutputCatcher(cmdCommands, outputWaitLimit, throwExceptions)
+            var exitCode = new OutputCatcher(cmdCommands, throwExceptions, collectOutputs, outputWaitLimit)
                 .Exec();
 
             return exitCode;
@@ -134,12 +135,12 @@ namespace CmdShellProj
         ///  and passes them to your shell.
         /// </summary>
         /// <param name="cmdCommands">CMD commands to be executed separated. Multi or a single line.</param>
+        /// <param name="outputCombined">Combined CMD outputs of stdout and stderr.</param>
         /// <param name="throwExceptions">Throw an exceptions in case of a non-zero exit code or exceeding the duration limit.</param>
         /// <param name="outputWaitLimit">The maximum duration limit for any output waiting from a CMD-shell. Default is 15 minutes.</param>
-        /// <param name="outputCombined">Combined CMD outputs of stdout and stderr.</param>
-        public int ExecAndShowCatched(string cmdCommands, out StringBuilder outputCombined, TimeSpan? outputWaitLimit = null, bool throwExceptions = false)
+        public int ExecAndShowCatched(string cmdCommands, out StringBuilder outputCombined, bool throwExceptions = false, TimeSpan? outputWaitLimit = null)
         {
-            var outputer = new OutputCatcher(cmdCommands, outputWaitLimit, throwExceptions, true);
+            var outputer = new OutputCatcher(cmdCommands, throwExceptions, true, outputWaitLimit);
             var exitCode = outputer.Exec();
 
             outputCombined = outputer.OutputCombined;
@@ -158,7 +159,11 @@ namespace CmdShellProj
 
             internal readonly StringBuilder OutputCombined = new StringBuilder();
 
-            internal OutputCatcher(string cmdCommands, TimeSpan? outputWaitingLimit = null, bool throwExceptions = false, bool collectOutputs = false) : base(cmdCommands, throwExceptions)
+            internal OutputCatcher(string cmdCommands,
+                bool throwExceptions = false,
+                bool collectOutputs = false,
+                TimeSpan? outputWaitingLimit = null)
+                : base(cmdCommands, throwExceptions)
             {
                 _outputWaitingLimit = GetMilliseconds(outputWaitingLimit);
                 _collectOutputs = collectOutputs;

@@ -15,7 +15,7 @@ namespace ConsoleRunner
 CD /
 
 none_existing_command /oops
-ping example.com -n 5
+ping example.com -n 2
 none_existing_command /oops
 
 CALL ""{msBuildCommandPrompt}""
