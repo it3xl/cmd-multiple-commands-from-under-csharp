@@ -21,7 +21,7 @@ namespace CmdShellProj
         /// <param name="cmdCommands">CMD commands to be executed separated. Multi or a single line.</param>
         /// <param name="executionLimit">The maximum duration limit for the entire execution. Default is 15 minutes.</param>
         /// <param name="throwExceptions">Throw an exceptions in case of a non-zero exit code or exceeding the duration limit.</param>
-        public void ExecExample(string cmdCommands, TimeSpan? executionLimit = null, bool throwExceptions = false)
+        public int ExecExample(string cmdCommands, TimeSpan? executionLimit = null, bool throwExceptions = false)
         {
             var commandsList = cmdCommands
                     .Replace("\r", string.Empty)
@@ -56,14 +56,16 @@ namespace CmdShellProj
 
                 var interrupted = !proc.WaitForExit(duration);
 
-                if (!throwExceptions)
-                    return;
+                if (throwExceptions)
+                {
+                     if (interrupted)
+                        throw new Exception("Duration limit is exceeded");
 
-                if (interrupted)
-                    throw new Exception("Duration limit is exceeded");
+                    if (proc.ExitCode != 0)
+                        throw new Exception(string.Format("Error exit code {0} received.", proc.ExitCode));
+                }
 
-                if (proc.ExitCode != 0)
-                    throw new Exception(string.Format("Error exit code {0} received.", proc.ExitCode));
+                return proc.ExitCode;
             }
         }
 
@@ -73,10 +75,12 @@ namespace CmdShellProj
         /// <param name="cmdCommands">CMD commands to be executed separated. Multi or a single line.</param>
         /// <param name="throwExceptions">Throw an exceptions in case of a non-zero exit code or exceeding the duration limit.</param>
         /// <param name="executionLimit">The maximum duration limit for the entire execution. Default is 15 minutes.</param>
-        public void ExecAndShow(string cmdCommands, TimeSpan? executionLimit = null, bool throwExceptions = false)
+        public int ExecAndShow(string cmdCommands, TimeSpan? executionLimit = null, bool throwExceptions = false)
         {
-            new Demonstrating(cmdCommands, executionLimit, throwExceptions)
+            var exitCode = new Demonstrating(cmdCommands, executionLimit, throwExceptions)
                 .Exec();
+
+            return exitCode;
         }
 
         /// <summary>
@@ -92,7 +96,7 @@ namespace CmdShellProj
                 _executionLimitMillisec = GetMilliseconds(executionLimit);
             }
 
-            public override void Exec()
+            public override int Exec()
             {
                 InitProcess();
                 using (Proc)
@@ -102,6 +106,8 @@ namespace CmdShellProj
                     var interrupted = !Proc.WaitForExit(_executionLimitMillisec);
 
                     Throw(interrupted, Proc.ExitCode);
+
+                    return Proc.ExitCode;
                 }
             }
         }
@@ -115,10 +121,12 @@ namespace CmdShellProj
         /// <param name="throwExceptions">Throw an exceptions in case of a non-zero exit code or exceeding the duration limit.</param>
         /// <param name="outputWaitingLimit">The maximum duration limit for any output waiting from a CMD-shell. Default is 15 minutes.</param>
         /// <param name="combineOutputs">Instructs to combine all console outputs to a StringBuilder.</param>
-        public void ExecAndShowCatched(string cmdCommands, TimeSpan? outputWaitingLimit = null, bool throwExceptions = false, bool combineOutputs = false)
+        public int ExecAndShowCatched(string cmdCommands, TimeSpan? outputWaitingLimit = null, bool throwExceptions = false, bool combineOutputs = false)
         {
-            new OutputCatcher(cmdCommands, outputWaitingLimit, throwExceptions, combineOutputs)
+            var exitCode = new OutputCatcher(cmdCommands, outputWaitingLimit, throwExceptions, combineOutputs)
                 .Exec();
+
+            return exitCode;
         }
 
         /// <summary>
@@ -138,7 +146,7 @@ namespace CmdShellProj
                 _combineOutputs = combineOutputs;
             }
 
-            public override void Exec()
+            public override int Exec()
             {
                 ProcStartInfo.RedirectStandardOutput = true;
                 ProcStartInfo.RedirectStandardError = true;
@@ -165,6 +173,8 @@ namespace CmdShellProj
                     }
 
                     Throw(interrupted, Proc.ExitCode);
+
+                    return Proc.ExitCode;
                 }
             }
 
@@ -245,7 +255,7 @@ namespace CmdShellProj
                 };
             }
 
-            public abstract void Exec();
+            public abstract int Exec();
 
             protected virtual void Throw(bool interrupted, int exitCode)
             {

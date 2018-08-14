@@ -29,14 +29,21 @@ CALL MsBuild SomeProject.csproj^
 
 ECHO ErrorLever = %ERRORLEVEL%";
 
-            new CmdShell()
+            var exitCode1 = new CmdShell()
                 .ExecAndShowCatched(cmdCommands);
 
-            new CmdShell()
+            var exitCode2 = new CmdShell()
                 .ExecAndShow(cmdCommands);
 
-            new CmdShell()
+            var exitCode3 = new CmdShell()
                 .ExecExample(cmdCommands);
+
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("exit code is {0} for ExecAndShowCatched", exitCode1);
+            Console.WriteLine("exit code is {0} for ExecAndShow", exitCode2);
+            Console.WriteLine("exit code is {0} for ExecExample", exitCode3);
+            Console.WriteLine();
 
         }
     }
