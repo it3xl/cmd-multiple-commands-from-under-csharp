@@ -1,5 +1,6 @@
 ﻿using CmdShellProj;
 using System;
+using System.Text;
 
 namespace ConsoleRunner
 {
@@ -32,6 +33,10 @@ ECHO ErrorLever = %ERRORLEVEL%";
             var exitCode1 = new CmdShell()
                 .ExecAndShowCatched(cmdCommands);
 
+            StringBuilder output;
+            var exitCode1_2 = new CmdShell()
+                .ExecAndShowCatched(cmdCommands, out output);
+
             var exitCode2 = new CmdShell()
                 .ExecAndShow(cmdCommands);
 
@@ -41,9 +46,22 @@ ECHO ErrorLever = %ERRORLEVEL%";
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine("exit code is {0} for ExecAndShowCatched", exitCode1);
+            Console.WriteLine("exit code is {0} for ExecAndShowCatched with outputs", exitCode1_2);
             Console.WriteLine("exit code is {0} for ExecAndShow", exitCode2);
             Console.WriteLine("exit code is {0} for ExecExample", exitCode3);
+
             Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("========================================================");
+            Console.WriteLine("Click to show intercepted outputs for ExecAndShowCatched");
+            Console.WriteLine("========================================================");
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
+
+            Console.ReadKey();
+            Console.WriteLine(output);
 
         }
     }
